@@ -1,0 +1,142 @@
+PS /home/ravi> az group create --name CreateVNetQS-rg --location eastus o{
+"id": "/subscriptions/a53ee22c-a989-4bff-930b-0f285fe78c27/resourceGroups/CreateVNetQS-rg",
+"location": "eastus",
+"managedBy": null,
+"name": "CreateVNetQS-rg",
+"properties": {
+"provisioningState": "Succeeded"
+},
+"tags": null,
+"type": "Microsoft.Resources/resourceGroups"
+}
+
+PS /home/ravi> az network vnet create --name myVNet --resource-group CreateVNetQS-rg --subnet-name default
+Resource provider 'Microsoft.Network' used by this operation is not registered. We are registering for you.
+Registration succeeded.
+{
+"newVNet": {
+"addressSpace": {
+"addressPrefixes": [
+"10.0.0.0/16"
+]
+},
+"enableDdosProtection": false,
+"etag": "W/"96d318ae-23bd-4a70-a0ca-ea580e60f182"",
+"id": "/subscriptions/a53ee22c-a989-4bff-930b-0f285fe78c27/resourceGroups/CreateVNetQS-rg/providers/Microsoft.Network/virtualNetworks/myVNet",
+"location": "eastus",
+"name": "myVNet",
+"provisioningState": "Succeeded",
+"resourceGroup": "CreateVNetQS-rg",
+"resourceGuid": "1c680654-59c9-4d8e-86d4-b184aeacebca",
+"subnets": [
+{
+"addressPrefix": "10.0.0.0/24",
+"delegations": [],
+"etag": "W/"96d318ae-23bd-4a70-a0ca-ea580e60f182"",
+"id": "/subscriptions/a53ee22c-a989-4bff-930b-0f285fe78c27/resourceGroups/CreateVNetQS-rg/providers/Microsoft.Network/virtualNetworks/myVNet/subnets/default",
+"name": "default",
+"privateEndpointNetworkPolicies": "Disabled",
+"privateLinkServiceNetworkPolicies": "Enabled",
+"provisioningState": "Succeeded",
+"resourceGroup": "CreateVNetQS-rg",
+"type": "Microsoft.Network/virtualNetworks/subnets"
+}
+],
+"type": "Microsoft.Network/virtualNetworks",
+"virtualNetworkPeerings": []
+}
+}
+
+PS /home/ravi>az vm create --resource-group CreateVNetQS-rg --name myVM1 --image UbuntuLTS --generate-ssh-keys --public-ip-address myPublicIP-myVM1 --no-wait
+SSH key files '/home/ravi/.ssh/id_rsa' and '/home/ravi/.ssh/id_rsa.pub' have been generated under ~/.ssh to allow SSH access to the VM. If using machines without permanent storage, back up your keys to a safe location.
+Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default. To know more about Trusted Launch, please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch
+It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. Please note that the default public IP used for VM creation will be changed from Basic to Standard in the future.
+
+PS /home/ravi>az vm create --resource-group CreateVNetQS-rg --name myVM2 --image UbuntuLTS --public-ip-address myPublicIP-myVM2 --public-ip-sku Standard --generate-ssh-keys
+Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default. To know more about Trusted Launch, please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch
+{
+"fqdns": "",
+"id": "/subscriptions/a53ee22c-a989-4bff-930b-0f285fe78c27/resourceGroups/CreateVNetQS-rg/providers/Microsoft.Compute/virtualMachines/myVM2",
+"location": "eastus",
+"macAddress": "00-22-48-25-50-00",
+"powerState": "VM running",
+"privateIpAddress": "10.0.0.5",
+"publicIpAddress": "20.172.173.236",
+"resourceGroup": "CreateVNetQS-rg",
+"zones": ""
+}
+
+PS /home/ravi> az network public-ip show --resource-group CreateVNetQS-rg --name myPublicIP-myVM2 --query ipAddress --output tsv
+20.172.173.236
+
+PS /home/ravi> ssh 20.172.173.236
+The authenticity of host '20.172.173.236 (20.172.173.236)' can't be established.
+ED25519 key fingerprint is SHA256:wQc52AfYHTSHKYUh1QuNdkB2Q6qUGkt7LbWI+3iAT3c.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '20.172.173.236' (ED25519) to the list of known hosts.
+Welcome to Ubuntu 18.04.6 LTS (GNU/Linux 5.4.0-1104-azure x86_64)
+
+Documentation: https://help.ubuntu.com
+Management: https://landscape.canonical.com
+Support: https://ubuntu.com/advantage
+System information as of Sun Mar 12 11:21:12 UTC 2023
+
+System load: 0.01 Processes: 104
+Usage of /: 4.5% of 28.89GB Users logged in: 0
+Memory usage: 5% IP address for eth0: 10.0.0.5
+Swap usage: 0%
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+To run a command as administrator (user "root"), use "sudo ".
+See "man sudo_root" for details.
+
+ravi@myVM2:$ sudo su -
+root@myVM2:# cat /etc/*release
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=18.04
+DISTRIB_CODENAME=bionic
+DISTRIB_DESCRIPTION="Ubuntu 18.04.6 LTS"
+NAME="Ubuntu"
+VERSION="18.04.6 LTS (Bionic Beaver)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 18.04.6 LTS"
+VERSION_ID="18.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=bionic
+UBUNTU_CODENAME=bionic
+root@myVM2:~# ping myVM1 -c 4
+PING myVM1.kqdgqhgjlghe1bwuwgck3lhlzc.bx.internal.cloudapp.net (10.0.0.4) 56(84) bytes of data.
+64 bytes from myvm1.internal.cloudapp.net (10.0.0.4): icmp_seq=1 ttl=64 time=2.59 ms
+64 bytes from myvm1.internal.cloudapp.net (10.0.0.4): icmp_seq=2 ttl=64 time=2.22 ms
+64 bytes from myvm1.internal.cloudapp.net (10.0.0.4): icmp_seq=3 ttl=64 time=2.10 ms
+64 bytes from myvm1.internal.cloudapp.net (10.0.0.4): icmp_seq=4 ttl=64 time=2.21 ms
+
+--- myVM1.kqdgqhgjlghe1bwuwgck3lhlzc.bx.internal.cloudapp.net ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3003ms
+rtt min/avg/max/mdev = 2.107/2.283/2.593/0.187 ms
+root@myVM2:# exit
+logout
+ravi@myVM2:$ exit
+logout
+Connection to 20.172.173.236 closed.
+
+PS /home/ravi> az group delete --name CreateVNetQS-rg --yes
+PS /home/ravi>
